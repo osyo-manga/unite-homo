@@ -30,26 +30,30 @@ endfunction
 
 let s:source = {
 \	"name" : "homo",
-\	"description" : "homo",
-\	"homo_counters" : map(range(winheight("%")), "s:rand()%100"),
+\	"description" : "homo"
 \}
+let s:source.hooks = {}
+
+function! s:source.hooks.on_init(args, context)
+	let a:context.source__counters = map(range(winheight("%")), "s:rand()%winwidth('%')")
+endfunction
 
 
 function! s:source.async_gather_candidates(args, context)
 	let a:context.source.unite__cached_candidates = []
 
-	let word = "三┌(┌ ＾o＾)┐ﾎﾓｫ…"
-" 	let yuri = "三┌(┌ ＾o＾)┐ゆりぃ"
+	let word = "三┌(┌ ＾o＾)┐".get(a:args, 0, "ﾎﾓｫ…")
 
-	for n in range(len(self.homo_counters))
-		let self.homo_counters[n] = self.homo_counters[n] + 1
-		if self.homo_counters[n] > winwidth("%")
-			let self.homo_counters[n] = 0
+	let counters = a:context.source__counters
+	for n in range(len(counters))
+		let counters[n] += 1
+		if counters[n] > winwidth("%")
+			let counters[n] = 0
 		endif
 	endfor
 
-	return map(copy(self.homo_counters), '{
-\		"word" : s:resize(join(split((repeat(" ", v:val).word), "\\zs")[18 : winwidth("%")], ""), winwidth("%")-10)
+	return map(copy(counters), '{
+\		"word" : s:resize(join(split((repeat(" ", v:val).word), "\\zs")[strchars(word) : winwidth("%")], ""), winwidth("%")-6)
 \	}')
 endfunction
 
